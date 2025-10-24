@@ -133,6 +133,14 @@ void handleMenu_OEE_Cell(AppStatus* as);
 
 void handleMenu_OEE_Robot(AppStatus* as);
 
+// ***************************************************************
+
+void handleMenu_Prod_Oper(AppStatus* as);
+
+// ***************************************************************
+
+void handleMenu_Prod_Robot(AppStatus* as);
+
 //********************************************************
 
 bool handleArray_Macchine_Add(ArrayPage* ap);

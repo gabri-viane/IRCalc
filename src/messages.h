@@ -28,7 +28,8 @@ typedef const unsigned char* message_t;
 #define N_FILE_TEXTS 4
 #define N_CELL_TIMES_TEXTS 5
 #define N_OEE_TEXTS 5
-#define N_CELL_DATA_TEXTS 21
+#define N_PROD_TEXTS 4
+#define N_CELL_DATA_TEXTS 25
 #define N_CELL_TEXTS() N_CELL_TIMES_TEXTS + N_CELL_DATA_TEXTS
 #define N_TEXTS 4
 
@@ -52,6 +53,10 @@ extern const unsigned char celltimes_texts[N_CELL_TIMES_TEXTS][MAX_MSG_LENGTH];
  * @brief Testi per gestire la struct OEE
  */
 extern const unsigned char oee_texts[N_OEE_TEXTS][MAX_MSG_LENGTH];
+/**
+ * @brief Testi per gestire la struct Produttività
+ */
+extern const unsigned char prod_texts[N_PROD_TEXTS][MAX_MSG_LENGTH];
 /**
  * @brief Testi per gestire la struct CellData
  */
@@ -90,6 +95,12 @@ extern const unsigned char celldata_texts[N_CELL_DATA_TEXTS][MAX_MSG_LENGTH];
 #define T_OEE_COMPUTED oee_texts[4]
 
 
+#define T_PROD_ORARIA prod_texts[0]
+#define T_PROD_TURNO prod_texts[1]
+#define T_PROD_GIORN prod_texts[2]
+#define T_PROD_MESE prod_texts[3]
+
+
 #define T_CELL_DATA_TEMPI celldata_texts[0]
 #define T_CELL_DATA_DOMANDA celldata_texts[1]
 #define T_CELL_DATA_T_SETUP celldata_texts[2]
@@ -111,6 +122,10 @@ extern const unsigned char celldata_texts[N_CELL_DATA_TEXTS][MAX_MSG_LENGTH];
 #define T_CELL_DATA_ROBOT_ARR celldata_texts[18]
 #define T_CELL_DATA_N_ROBOT celldata_texts[19]
 #define T_CELL_DATA_INEFF_ROBOT celldata_texts[20]
+#define T_CELL_DATA_RP_OPER celldata_texts[21]
+#define T_CELL_DATA_RP_ROBOT celldata_texts[22]
+#define T_CELL_DATA_PROD_OPER celldata_texts[23]
+#define T_CELL_DATA_PROD_ROBOT celldata_texts[24]
 
 
 //base_pointer, max_text_size, size

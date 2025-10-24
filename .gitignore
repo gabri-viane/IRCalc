@@ -1,0 +1,11 @@
+irSession.sex
+selected.pdn
+simple.bin
+simple.code-workspace
+simple.g3a
+test.sex
+unselected.pdn
+.vscode/c_cpp_properties.json
+obj/*
+build/*
+.vscode/*

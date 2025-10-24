@@ -22,11 +22,15 @@ const unsigned char celltimes_texts[N_CELL_TIMES_TEXTS][MAX_MSG_LENGTH] = {
 const unsigned char oee_texts[N_OEE_TEXTS][MAX_MSG_LENGTH] = {
     "Disponibilita", "Rendimento", "Qualita", "OEE", "Computed"};
 
+const unsigned char prod_texts[N_PROD_TEXTS][MAX_MSG_LENGTH] = {
+    "Prod.Oraria", "Prod.Turno", "Prod.Giorno", "Prod.Mese"};
+
 const unsigned char celldata_texts[N_CELL_DATA_TEXTS][MAX_MSG_LENGTH] = {
     "Tempi", "Pz domanda", "T.Setup [s]", "T.manut [s]", "T.Guasti [s]", "PPM Oper", "PPM Robot",
     "Macchine", "N.Macchine", "Stazioni", "N.Stazioni", "Eff.Cella",
     "OEE Cell/Oper", "Operatori", "N.Operatori", "Tpausa", "Ineff.Oper [%]",
-    "OEE Rbt", "Robots", "N.Robots", "Ineff.Rbt [%]"};
+    "OEE Rbt", "Robots", "N.Robots", "Ineff.Rbt [%]",
+    "RP Oper","RP Robot","Prod.Oper","Prod.Robot"};
 
 /*
 const unsigned char *const getStringPointer(unsigned int message_code)

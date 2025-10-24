@@ -154,7 +154,7 @@ void computeRend(CellData* cell, SOLVER_TYPE solver) {
         cell->times.total_disp_time = tt - getUnavailableTime(cell);
     }
     // Calcolo il rendimento
-    ref->rendimento = ((1.0 * (cell->times.total_disp_time - extra_time)) / cell->times.total_disp_time) * efficienza * eff_macchine;
+    ref->rendimento = ((1.0 * (cell->times.total_disp_time - extra_time)) / cell->times.total_disp_time) * efficienza/100.0 * eff_macchine;
     // è da ri-calcolare l'OEE complessivo poichè ho modificato il rendimento
     ref->computed = false;
 }
@@ -217,35 +217,31 @@ void computeOEE(CellData* cell, SOLVER_TYPE solver) {
 }
 
 void computeProduttivita(CellData* cell, SOLVER_TYPE solver) {
-    // Non ho RP, è inutile fare i calcoli
-    if (cell->RP == 0) {
-        return;
-    }
-
-    OEE* ref;
+    unsigned int RP = 0;
+    Produttivita* pr = 0;
+    OEE* oee = 0;
     switch (solver) {
         case CELL_SOLVER:
+            return;
         case OPERATOR_SOLVER:
-            ref = &cell->cell_or_operatorsOEE;
+            RP = cell->RP_oper;
+            pr = &cell->prod_oper;
+            oee = &cell->cell_or_operatorsOEE;
             break;
         case ROBOT_SOLVER:
-            ref = &cell->robotsOEE;
+            RP = cell->RP_robot;
+            pr = &cell->prod_robot;
+            oee = &cell->robotsOEE;
             break;
-        default:
-            return;
+    }
+    // Non ho RP, è inutile fare i calcoli
+    if (RP == 0 || pr == 0 || oee == 0) {
+        return;
     }
     // Ricalcolo l'OEE se necessario
     computeOEE(cell, solver);
-
-    Produttivita* th = &cell->prod_teorica;
-    th->oraria = 3600.0 / cell->RP;
-    th->turno = (unsigned long int)(th->oraria * cell->times.ore_turno);
-    th->giornaliera = th->turno * cell->times.turni;
-    th->mensile = th->giornaliera * cell->times.gg_mese;
-
-    Produttivita* eff = &cell->prod_effettiva;
-    eff->oraria = (3600.0 / cell->RP) * ref->OEE;
-    eff->turno = (unsigned long int)(eff->oraria * cell->times.ore_turno);
-    eff->giornaliera = eff->turno * cell->times.turni;
-    eff->mensile = eff->giornaliera * cell->times.gg_mese;
+    pr->oraria = (3600.0 / RP) * oee->OEE;
+    pr->turno = (unsigned long int)(pr->oraria * cell->times.ore_turno);
+    pr->giornaliera = pr->turno * cell->times.turni;
+    pr->mensile = pr->giornaliera * cell->times.gg_mese;
 }

@@ -22,24 +22,42 @@ SettingsPage celltimes_menu = CREATE_SETTINGS_PAGE();
 /************************ END CELL TIMES ****************************/
 
 /**************************** OEE CELLA/OPER ****************************/
-SettingRow oee_cp_disp = CREATE_SETTINGS_ROW_IN(T_OEE_DISP, &cd.cell_or_operatorsOEE.disponibilita, DOUBLE);
-SettingRow oee_cp_rend = CREATE_SETTINGS_ROW_IN(T_OEE_REND, &cd.cell_or_operatorsOEE.rendimento, DOUBLE);
-SettingRow oee_cp_qual = CREATE_SETTINGS_ROW_IN(T_OEE_QUAL, &cd.cell_or_operatorsOEE.qualita, DOUBLE);
+SettingRow oee_cp_disp = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_DISP, &cd.cell_or_operatorsOEE.disponibilita, DOUBLE);
+SettingRow oee_cp_rend = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_REND, &cd.cell_or_operatorsOEE.rendimento, DOUBLE);
+SettingRow oee_cp_qual = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_QUAL, &cd.cell_or_operatorsOEE.qualita, DOUBLE);
 SettingRow oee_cp_oee = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_OEE, &cd.cell_or_operatorsOEE.OEE, DOUBLE);
 SettingRow oee_cp_computed = CREATE_SETTINGS_ROW_IN(T_OEE_COMPUTED, &cd.cell_or_operatorsOEE.computed, BOOL);
 
 SettingsPage oee_cell_oper_menu = CREATE_SETTINGS_PAGE();
-/************************ END CELL TIMES ****************************/
+/************************ END CELL OEE OPER ****************************/
 
 /**************************** OEE ROBOT ****************************/
-SettingRow oee_rbt_disp = CREATE_SETTINGS_ROW_IN(T_OEE_DISP, &cd.robotsOEE.disponibilita, DOUBLE);
-SettingRow oee_rbt_rend = CREATE_SETTINGS_ROW_IN(T_OEE_REND, &cd.robotsOEE.rendimento, DOUBLE);
-SettingRow oee_rbt_qual = CREATE_SETTINGS_ROW_IN(T_OEE_QUAL, &cd.robotsOEE.qualita, DOUBLE);
+SettingRow oee_rbt_disp = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_DISP, &cd.robotsOEE.disponibilita, DOUBLE);
+SettingRow oee_rbt_rend = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_REND, &cd.robotsOEE.rendimento, DOUBLE);
+SettingRow oee_rbt_qual = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_QUAL, &cd.robotsOEE.qualita, DOUBLE);
 SettingRow oee_rbt_oee = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_OEE, &cd.robotsOEE.OEE, DOUBLE);
 SettingRow oee_rbt_computed = CREATE_SETTINGS_ROW_IN(T_OEE_COMPUTED, &cd.robotsOEE.computed, BOOL);
 
 SettingsPage oee_robot_menu = CREATE_SETTINGS_PAGE();
-/************************ END CELL TIMES ****************************/
+/************************ END CELL OEE ROBOT ****************************/
+
+/**************************** PROD OPER ****************************/
+SettingRow prod_oper_oraria = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_ORARIA, &cd.prod_oper.oraria, DOUBLE);
+SettingRow prod_oper_turno = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_TURNO, &cd.prod_oper.turno, UNSIGNED_INT);
+SettingRow prod_oper_giornaliera = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_GIORN, &cd.prod_oper.giornaliera, UNSIGNED_INT);
+SettingRow prod_oper_mensile = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_MESE, &cd.prod_oper.mensile, UNSIGNED_INT);
+
+SettingsPage prod_oper_menu = CREATE_SETTINGS_PAGE();
+/************************ END PROD OPER ****************************/
+
+/**************************** PROD ROBOT ****************************/
+SettingRow prod_rbt_oraria = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_ORARIA, &cd.prod_robot.oraria, DOUBLE);
+SettingRow prod_rbt_turno = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_TURNO, &cd.prod_robot.turno, UNSIGNED_INT);
+SettingRow prod_rbt_giornaliera = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_GIORN, &cd.prod_robot.giornaliera, UNSIGNED_INT);
+SettingRow prod_rbt_mensile = CREATE_SETTINGS_ROW_OUT_CALC(T_PROD_MESE, &cd.prod_robot.mensile, UNSIGNED_INT);
+
+SettingsPage prod_robot_menu = CREATE_SETTINGS_PAGE();
+/************************ END PROD ROBOT ****************************/
 
 /**************************** CELL DATA ****************************/
 SettingRow cd_celltimes = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_TEMPI, handleMenu_CellTimes, PAGE_CHANGE);
@@ -64,9 +82,13 @@ SettingRow cd_oee_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_OEE_ROBOT, handleM
 SettingRow cd_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_ROBOT_ARR, 0, ARRAY);
 SettingRow cd_n_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_N_ROBOT, &cd.n_robot, UNSIGNED_CHAR);
 SettingRow cd_ineff_robot = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_INEFF_ROBOT, &cd.ineffiecenza_robot, UNSIGNED_CHAR);
+// Risultati
+SettingRow cd_rp_oper = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_RP_OPER, &cd.RP_oper, UNSIGNED_INT);
+SettingRow cd_rp_robot = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_RP_ROBOT, &cd.RP_robot, UNSIGNED_INT);
+SettingRow cd_prod_oper = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_PROD_OPER, handleMenu_Prod_Oper, PAGE_CHANGE);
+SettingRow cd_prod_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_PROD_ROBOT, handleMenu_Prod_Robot, PAGE_CHANGE);
 
 SettingsPage celldata_menu = CREATE_SETTINGS_PAGE();
-
 /**************************** END CELL DATA ****************************/
 
 /*****************************FUNCTION BARS DEFINITIONS*************************** */
@@ -111,6 +133,16 @@ void initMenus() {
     addSettingRow(&oee_robot_menu, &oee_rbt_qual);
     addSettingRow(&oee_robot_menu, &oee_rbt_oee);
     addSettingRow(&oee_robot_menu, &oee_rbt_computed);
+    // PROD OPER
+    addSettingRow(&prod_oper_menu, &prod_oper_oraria);
+    addSettingRow(&prod_oper_menu, &prod_oper_turno);
+    addSettingRow(&prod_oper_menu, &prod_oper_giornaliera);
+    addSettingRow(&prod_oper_menu, &prod_oper_mensile);
+    // PROD ROBOT
+    addSettingRow(&prod_robot_menu, &prod_rbt_oraria);
+    addSettingRow(&prod_robot_menu, &prod_rbt_turno);
+    addSettingRow(&prod_robot_menu, &prod_rbt_giornaliera);
+    addSettingRow(&prod_robot_menu, &prod_rbt_mensile);
     // CELL DATA
     addSettingRow(&celldata_menu, &cd_celltimes);
     addSettingRow(&celldata_menu, &cd_domanda);
@@ -132,6 +164,10 @@ void initMenus() {
     addSettingRow(&celldata_menu, &cd_robot);
     addSettingRow(&celldata_menu, &cd_n_robot);
     addSettingRow(&celldata_menu, &cd_ineff_robot);
+    addSettingRow(&celldata_menu, &cd_rp_oper);
+    addSettingRow(&celldata_menu, &cd_rp_robot);
+    addSettingRow(&celldata_menu, &cd_prod_oper);
+    addSettingRow(&celldata_menu, &cd_prod_robot);
 }
 
 /**************END CHIAMATE GLOBALI************ */
@@ -465,6 +501,12 @@ static void handleCompute_OEE_Cell(SettingRow* sr) {
         // Devo resettarlo così la funzione lo calcola nuovamente
         cd.cell_or_operatorsOEE.computed = false;
         computeOEE(&cd, OPERATOR_SOLVER);
+    }else if(sr == &oee_cp_disp){
+        computeDisp(&cd,OPERATOR_SOLVER);
+    }else if(sr == &oee_cp_rend){
+        computeRend(&cd,OPERATOR_SOLVER);
+    }else if(sr == &oee_cp_qual){
+        computeQual(&cd,OPERATOR_SOLVER);
     }
 }
 
@@ -499,6 +541,12 @@ static void handleCompute_OEE_Robot(SettingRow* sr) {
         // Devo resettarlo così la funzione lo calcola nuovamente
         cd.robotsOEE.computed = false;
         computeOEE(&cd, CELL_SOLVER);
+    }else if(sr == &oee_rbt_disp){
+        computeDisp(&cd,ROBOT_SOLVER);
+    }else if(sr == &oee_rbt_rend){
+        computeRend(&cd,ROBOT_SOLVER);
+    }else if(sr == &oee_rbt_qual){
+        computeQual(&cd,ROBOT_SOLVER);
     }
 }
 
@@ -525,6 +573,77 @@ void handleMenu_OEE_Robot(AppStatus* as) {
         handleFunctionKey(&key);
     }
 }
+
+// *********************** MENU PROD OPER *****************************
+
+static void handleCompute_Prod_Oper(SettingRow* sr) {
+    if (sr == &prod_oper_giornaliera ||
+        sr == &prod_oper_oraria ||
+        sr == &prod_oper_turno ||
+        sr == &prod_oper_mensile) {
+        computeProduttivita(&cd,OPERATOR_SOLVER);
+    }
+}
+
+void handleMenu_Prod_Oper(AppStatus* as) {
+    as->currentMenu = &prod_oper_menu;
+    as->currentMenuHandler = handleMenu_Prod_Oper;
+    as->currentComputeHandler = handleCompute_Prod_Oper;
+
+    // Non ho array da gestire: rimuovo i riferimenti
+    as->currentArrayMenuHandler = 0;
+    as->currentAddArrayElementHandler = 0;
+    as->currentRemoveArrayElementHandler = 0;
+    as->currentShowArrayElementHandler = 0;
+
+    int key;
+    bool ret = 0;
+    handleDrawFunctionBar();
+    while (true) {
+        ret = handleSettingsPage(&prod_oper_menu, &key, handleFunctionKey, handleDrawFunctionBar, handleEditVariable);
+        if (!ret) {  // utente ha premuto "EXIT"
+            return;
+        }
+        // Controllo se ha premuto "EXE" su un campo "COMPUTED" allora devo ricalcolare
+        handleFunctionKey(&key);
+    }
+}
+
+// *********************** MENU PROD ROBOT *****************************
+
+static void handleCompute_Prod_Robot(SettingRow* sr) {
+    if (sr == &prod_rbt_giornaliera ||
+        sr == &prod_rbt_oraria ||
+        sr == &prod_rbt_turno ||
+        sr == &prod_rbt_mensile) {
+        computeProduttivita(&cd,ROBOT_SOLVER);
+    }
+}
+
+void handleMenu_Prod_Robot(AppStatus* as) {
+    as->currentMenu = &prod_robot_menu;
+    as->currentMenuHandler = handleMenu_Prod_Robot;
+    as->currentComputeHandler = handleCompute_Prod_Robot;
+
+    // Non ho array da gestire: rimuovo i riferimenti
+    as->currentArrayMenuHandler = 0;
+    as->currentAddArrayElementHandler = 0;
+    as->currentRemoveArrayElementHandler = 0;
+    as->currentShowArrayElementHandler = 0;
+
+    int key;
+    bool ret = 0;
+    handleDrawFunctionBar();
+    while (true) {
+        ret = handleSettingsPage(&prod_robot_menu, &key, handleFunctionKey, handleDrawFunctionBar, handleEditVariable);
+        if (!ret) {  // utente ha premuto "EXIT"
+            return;
+        }
+        // Controllo se ha premuto "EXE" su un campo "COMPUTED" allora devo ricalcolare
+        handleFunctionKey(&key);
+    }
+}
+
 // ************************** GESTIONE ARRAY MACCHINE***************************
 
 bool handleArray_Macchine_Add(ArrayPage* ap) {
@@ -590,6 +709,7 @@ bool handleArray_Macchine_Display(ArrayPage* ap) {
     if (*ap->length == 0) {  // Non ho elementi, l'utente ha premuto sul vuoto
         return false;
     }
+
     return true;
 }
 

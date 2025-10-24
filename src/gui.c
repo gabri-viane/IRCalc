@@ -229,15 +229,23 @@ bool handleArrayElementsMenu(ArrayPage* ap, int* key,
     Bdisp_PutDisp_DD();
 
     while (1) {
-        GetKey(key);                                                      // Aspetto il tasto ed aggiorna anche la grafica
-        if (*key == KEY_CTRL_DOWN && (ap->selected + 1) < *ap->length) {  // Tasto per scendere nel menu
-            ap->selected++;
+        GetKey(key);                  // Aspetto il tasto ed aggiorna anche la grafica
+        if (*key == KEY_CTRL_DOWN) {  // Tasto per scendere nel menu
+            if ((ap->selected + 1) < *ap->length) {
+                ap->selected++;
+            } else {  // Sono in fondo al menu: torno all'inizio
+                ap->selected = 0;
+            }
             ap->selectedPtr = ap->basePtr + ap->esize * ap->selected;
             fillArea(191, 24, 192, 191, COLOR_WHITE);
             drawArrayRightMenu(ap);
             drawFunctionBar();
-        } else if (*key == KEY_CTRL_UP && ap->selected > 0) {  // Tasto per salire nel menu
-            ap->selected--;
+        } else if (*key == KEY_CTRL_UP) {  // Tasto per salire nel menu
+            if (ap->selected > 0) {
+                ap->selected--;
+            } else if (*ap->length > 0) {  // Se ho almeno 1 elemento e sono in cima, torno all'ultimo
+                ap->selected = *ap->length - 1;
+            }
             ap->selectedPtr = ap->basePtr + ap->esize * ap->selected;
             fillArea(191, 24, 192, 191, COLOR_WHITE);
             drawArrayRightMenu(ap);
@@ -247,7 +255,7 @@ bool handleArrayElementsMenu(ArrayPage* ap, int* key,
                 fillArea(191, 24, 192, 191, COLOR_WHITE);
                 return true;  // Ritorno alla funzione che mi chiama solamente se ho mostrato l'elemento.
             }
-        } else if (*key == KEY_CTRL_EXIT) {            // Tasto uscita dal menu
+        } else if (*key == KEY_CTRL_EXIT) {  // Tasto uscita dal menu
             LoadVRAM_1();
             return false;
         } else if (*key == KEY_CHAR_MINUS) {  // Voglio rimuovere l'elemento corrente
@@ -304,13 +312,21 @@ bool handleSettingsPage(SettingsPage* page, int* key,
             inputRequest(*key);
             Bdisp_Fill_VRAM(COLOR_WHITE, 2);
             drawSettingsPage(page);
-        } else if (*key == KEY_CTRL_DOWN && (page->selected + 1) < page->size) {  // Tasto per scendere nel menu
-            page->selected++;
+        } else if (*key == KEY_CTRL_DOWN) {  // Tasto per scendere nel menu
+            if ((page->selected + 1) < page->size) {
+                page->selected++;
+            } else { //Seleziono il primo
+                page->selected = 0;
+            }
             Bdisp_Fill_VRAM(COLOR_WHITE, 2);
             drawSettingsPage(page);
             drawFunctionBar();
-        } else if (*key == KEY_CTRL_UP && page->selected > 0) {  // Tasto per salire nel menu
-            page->selected--;
+        } else if (*key == KEY_CTRL_UP) {  // Tasto per salire nel menu
+            if (page->selected > 0) {
+                page->selected--;
+            } else if (page->size > 0) {//Seleziono l'ultimo
+                page->selected = page->size - 1;
+            }
             Bdisp_Fill_VRAM(COLOR_WHITE, 2);
             drawSettingsPage(page);
             drawFunctionBar();

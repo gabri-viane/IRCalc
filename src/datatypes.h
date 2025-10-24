@@ -125,9 +125,10 @@ typedef struct {
 	/*********************************
 				RISULTATI
 	**********************************/
-	unsigned short RP; //Ritmo produttivo della cella (s/pz)
-	Produttivita prod_teorica;//Quella utilizzando solo RP e i tempi
-	Produttivita prod_effettiva;//Quella che utilizza anche l'OEE
+	unsigned int RP_oper; //Ritmo produttivo della cella con operatore (s/pz)
+	unsigned int RP_robot; //Ritmo produttivo della cella con robot (s/pz)
+	Produttivita prod_robot;//Quella utilizzando solo RP e i tempi
+	Produttivita prod_oper;//Quella che utilizza anche l'OEE
 }CellData;
 
 #define CREATE_CELL_TIMES() {8, 2, 22, 0l ,0l}
