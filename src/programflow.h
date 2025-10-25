@@ -15,6 +15,8 @@ typedef struct {
 
 typedef struct {
     CellData* cd;
+    Gripping* grip;
+    GrippingResult* grip_res;
     res_error_t last_error;
     bool toBeSaved;
 
@@ -148,19 +150,24 @@ bool handleArray_Macchine_Remove(ArrayPage* ap);
 bool handleArray_Macchine_Display(ArrayPage* ap);
 void handleArray_Macchine(AppStatus* as);
 
+//********************************************************
+
+bool handleArray_Robot_Add(ArrayPage* ap);
+bool handleArray_Robot_Remove(ArrayPage* ap);
+bool handleArray_Robot_Display(ArrayPage* ap);
+void handleArray_Robot(AppStatus* as);
+
 // ***************************************************************
 
 void handleMenu_CellData(AppStatus* as);
 
-/*
-ID MENU = 0
-Gestisce la scelta delle opzioni iniziali:
--crea cella [Funzione]
--carica cella [Funzione]
--salva cella [Funzione]
--modifica dati [Menu]
-Contiene e gestisce tutte le variabili e chiamate del programma
-*/
-void mainHandler();
+// ***************************************************************
+
+void handleMenu_Gripper(AppStatus *as);
+
+// ***************************************************************
+
+void handleMainMenu(AppStatus *as);
+
 
 #endif

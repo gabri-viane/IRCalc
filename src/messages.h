@@ -21,17 +21,24 @@
 typedef unsigned int messagecode_t;
 typedef const unsigned char* message_t;
 
-#define MAX_MSG_LENGTH 15
+#define MAX_MSG_LENGTH 16
 
 #define N_ERRORS_TEXTS 10
 #define N_FB_TEXTS 10
 #define N_FILE_TEXTS 4
 #define N_CELL_TIMES_TEXTS 5
-#define N_OEE_TEXTS 5
+#define N_OEE_TEXTS 6
 #define N_PROD_TEXTS 4
-#define N_CELL_DATA_TEXTS 25
-#define N_CELL_TEXTS() N_CELL_TIMES_TEXTS + N_CELL_DATA_TEXTS
+#define N_CELL_DATA_TEXTS 26
+#define N_CELL_TEXTS() N_CELL_TIMES_TEXTS + N_CELL_DATA_TEXTS 
+
+#define N_GRIPPER_TEXTS 12
+
+#define N_MAIN_MENU_TEXTS 5
+
 #define N_TEXTS 4
+
+extern const unsigned char main_menu_texts[N_MAIN_MENU_TEXTS][MAX_MSG_LENGTH]; 
 
 /**
  * @brief Testi usati per gli errori
@@ -62,7 +69,7 @@ extern const unsigned char prod_texts[N_PROD_TEXTS][MAX_MSG_LENGTH];
  */
 extern const unsigned char celldata_texts[N_CELL_DATA_TEXTS][MAX_MSG_LENGTH];
 
-
+extern const unsigned char gripper_texts[N_GRIPPER_TEXTS][MAX_MSG_LENGTH];
 
 #define T_FILE_CREA file_texts[0]
 #define T_FILE_CARICA file_texts[1]
@@ -93,6 +100,7 @@ extern const unsigned char celldata_texts[N_CELL_DATA_TEXTS][MAX_MSG_LENGTH];
 #define T_OEE_QUAL oee_texts[2]
 #define T_OEE_OEE oee_texts[3]
 #define T_OEE_COMPUTED oee_texts[4]
+#define T_OEE_TT_ADJ oee_texts[5]
 
 
 #define T_PROD_ORARIA prod_texts[0]
@@ -126,7 +134,25 @@ extern const unsigned char celldata_texts[N_CELL_DATA_TEXTS][MAX_MSG_LENGTH];
 #define T_CELL_DATA_RP_ROBOT celldata_texts[22]
 #define T_CELL_DATA_PROD_OPER celldata_texts[23]
 #define T_CELL_DATA_PROD_ROBOT celldata_texts[24]
+#define T_CELL_DATA_TAKT_TIME celldata_texts[25]
 
+#define T_GRIPPER_MASS_OBJ gripper_texts[0]
+#define T_GRIPPER_MASS_GRIPPER gripper_texts[1]
+#define T_GRIPPER_COEFF_ATTR gripper_texts[2]
+#define T_GRIPPER_COEFF_SICUR gripper_texts[3]
+#define T_GRIPPER_ACCELER gripper_texts[4]
+#define T_GRIPPER_ALFA_GRADI gripper_texts[5]
+#define T_GRIPPER_FORCE_FIT gripper_texts[6]
+#define T_GRIPPER_VERTICAL gripper_texts[7]
+#define T_GRIPPER_N_GRIFFE gripper_texts[8]
+#define T_GRIPPER_F_TOT gripper_texts[9]
+#define T_GRIPPER_F_GRIFFA gripper_texts[10]
+#define T_GRIPPER_PRESA_VERTICALE gripper_texts[11]
+
+#define T_MAIN_MENU_SAVE main_menu_texts[0]
+#define T_MAIN_MENU_DELETE main_menu_texts[1]
+#define T_MAIN_MENU_CELL main_menu_texts[2]
+#define T_MAIN_MENU_GRIPPER main_menu_texts[3]
 
 //base_pointer, max_text_size, size
 typedef struct {

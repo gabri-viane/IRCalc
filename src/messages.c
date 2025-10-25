@@ -7,6 +7,10 @@ const TextElement texts[N_TEXTS] = {
     {&file_texts[0][0], MAX_MSG_LENGTH, N_FILE_TEXTS},
     {&fb_texts[0][0], MAX_MSG_LENGTH, N_FB_TEXTS},
     {&celltimes_texts[0][0], MAX_MSG_LENGTH, N_CELL_TIMES_TEXTS}};
+
+const unsigned char main_menu_texts[N_MAIN_MENU_TEXTS][MAX_MSG_LENGTH] = {
+    "Salva", "Elimina", "Cella", "Gripper", ""};
+
 const unsigned char errors_texts[N_ERRORS_TEXTS][MAX_MSG_LENGTH] = {
     "Unknown", "Err Generico", "Err Solver", "", "", ""};
 
@@ -20,17 +24,23 @@ const unsigned char celltimes_texts[N_CELL_TIMES_TEXTS][MAX_MSG_LENGTH] = {
     "H.Turno", "Turni", "GG Mese", "T.Tot", "T.Disp"};
 
 const unsigned char oee_texts[N_OEE_TEXTS][MAX_MSG_LENGTH] = {
-    "Disponibilita", "Rendimento", "Qualita", "OEE", "Computed"};
+    "Disponibilita", "Rendimento", "Qualita", "OEE", "Computed", "TT*"};
 
 const unsigned char prod_texts[N_PROD_TEXTS][MAX_MSG_LENGTH] = {
     "Prod.Oraria", "Prod.Turno", "Prod.Giorno", "Prod.Mese"};
 
 const unsigned char celldata_texts[N_CELL_DATA_TEXTS][MAX_MSG_LENGTH] = {
-    "Tempi", "Pz domanda", "T.Setup [s]", "T.manut [s]", "T.Guasti [s]", "PPM Oper", "PPM Robot",
+    "Tempi", "Pz domanda", "T.Setup [h/ms]", "T.manut [h/ms]", "T.Guasti [h/ms]", "PPM Oper", "PPM Robot",
     "Macchine", "N.Macchine", "Stazioni", "N.Stazioni", "Eff.Cella",
-    "OEE Cell/Oper", "Operatori", "N.Operatori", "Tpausa", "Ineff.Oper [%]",
+    "OEE Cell/Oper", "Operatori", "N.Operatori", "T.pausa [h/trn]", "Ineff.Oper [%]",
     "OEE Rbt", "Robots", "N.Robots", "Ineff.Rbt [%]",
-    "RP Oper","RP Robot","Prod.Oper","Prod.Robot"};
+    "RP Oper", "RP Robot", "Prod.Oper", "Prod.Robot",
+    "Takt Time"};
+
+const unsigned char gripper_texts[N_GRIPPER_TEXTS][MAX_MSG_LENGTH] = {
+    "Massa Ogg.", "Massa Gripp.", "Coeff.Attr.", "Coeff.Sicur.", "Acceler.", "Alfa [gradi]", "Force-Fit",
+    "Vertical", "N.griffe", "Forza Tot", "Forza Grif", "Presa Vert."};
+
 
 /*
 const unsigned char *const getStringPointer(unsigned int message_code)

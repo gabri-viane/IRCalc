@@ -6,17 +6,20 @@
 
 #include "datatypes.h"
 #include "gui.h"
+#include "session.h"
 #include "solver.h"
 
 CellData cd = CREATE_CELL();
+Gripping grp = CREATE_GRIPPING();
+GrippingResult grp_res = {0.0, 0.0};
 AppStatus as = {};
 
 /**************************** CELL TIMES ****************************/
 SettingRow ct_turniGG = CREATE_SETTINGS_ROW_IN(T_CELL_TIMES_TURNI_GG, &cd.times.turni, UNSIGNED_CHAR);
 SettingRow ct_oreTurno = CREATE_SETTINGS_ROW_IN(T_CELL_TIMES_ORE_TURNO, &cd.times.ore_turno, UNSIGNED_CHAR);
 SettingRow ct_ggMese = CREATE_SETTINGS_ROW_IN(T_CELL_TIMES_GG_MESE, &cd.times.gg_mese, UNSIGNED_CHAR);
-SettingRow ct_tTot = CREATE_SETTINGS_ROW_OUT_CALC(T_CELL_TIMES_T_TOT, &cd.times.total_th_time, UNSIGNED_LONG);
-SettingRow ct_tTotDisp = CREATE_SETTINGS_ROW_OUT_CALC(T_CELL_TIMES_T_DISP, &cd.times.total_disp_time, UNSIGNED_LONG);
+SettingRow ct_tTot = CREATE_SETTINGS_ROW_OUT_CALC(T_CELL_TIMES_T_TOT, &cd.times.total_th_time, DOUBLE);
+SettingRow ct_tTotDisp = CREATE_SETTINGS_ROW_OUT_CALC(T_CELL_TIMES_T_DISP, &cd.times.total_disp_time, DOUBLE);
 
 SettingsPage celltimes_menu = CREATE_SETTINGS_PAGE();
 /************************ END CELL TIMES ****************************/
@@ -27,6 +30,7 @@ SettingRow oee_cp_rend = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_REND, &cd.cell_or_ope
 SettingRow oee_cp_qual = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_QUAL, &cd.cell_or_operatorsOEE.qualita, DOUBLE);
 SettingRow oee_cp_oee = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_OEE, &cd.cell_or_operatorsOEE.OEE, DOUBLE);
 SettingRow oee_cp_computed = CREATE_SETTINGS_ROW_IN(T_OEE_COMPUTED, &cd.cell_or_operatorsOEE.computed, BOOL);
+SettingRow oee_cp_tt_adj = CREATE_SETTINGS_ROW_OUT_CALC(T_OEE_TT_ADJ, &cd.cell_or_operatorsOEE.TT_adj, DOUBLE);
 
 SettingsPage oee_cell_oper_menu = CREATE_SETTINGS_PAGE();
 /************************ END CELL OEE OPER ****************************/
@@ -37,6 +41,7 @@ SettingRow oee_rbt_rend = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_REND, &cd.robotsOEE.
 SettingRow oee_rbt_qual = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_QUAL, &cd.robotsOEE.qualita, DOUBLE);
 SettingRow oee_rbt_oee = CREATE_SETTINGS_ROW_IN_CALC(T_OEE_OEE, &cd.robotsOEE.OEE, DOUBLE);
 SettingRow oee_rbt_computed = CREATE_SETTINGS_ROW_IN(T_OEE_COMPUTED, &cd.robotsOEE.computed, BOOL);
+SettingRow oee_rbt_tt_adj = CREATE_SETTINGS_ROW_OUT_CALC(T_OEE_TT_ADJ, &cd.robotsOEE.TT_adj, DOUBLE);
 
 SettingsPage oee_robot_menu = CREATE_SETTINGS_PAGE();
 /************************ END CELL OEE ROBOT ****************************/
@@ -62,11 +67,12 @@ SettingsPage prod_robot_menu = CREATE_SETTINGS_PAGE();
 /**************************** CELL DATA ****************************/
 SettingRow cd_celltimes = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_TEMPI, handleMenu_CellTimes, PAGE_CHANGE);
 SettingRow cd_domanda = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_DOMANDA, &cd.domanda_pezzi, UNSIGNED_LONG);
-SettingRow cd_tSetup = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_SETUP, &cd.tempo_setup, UNSIGNED_LONG);
-SettingRow cd_tManut = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_MANUT, &cd.tempo_manutenzione, UNSIGNED_LONG);
-SettingRow cd_tGuasti = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_GUASTI, &cd.tempo_guasti, UNSIGNED_LONG);
+SettingRow cd_tSetup = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_SETUP, &cd.tempo_setup, DOUBLE);
+SettingRow cd_tManut = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_MANUT, &cd.tempo_manutenzione, DOUBLE);
+SettingRow cd_tGuasti = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_GUASTI, &cd.tempo_guasti, DOUBLE);
 SettingRow cd_ppmOper = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_PPM_OPER, &cd.ppm_cella_oper, UNSIGNED_LONG);
 SettingRow cd_ppmRobot = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_PPM_ROBOT, &cd.ppm_cella_robot, UNSIGNED_LONG);
+SettingRow cd_takt_time = CREATE_SETTINGS_ROW_IN_CALC(T_CELL_DATA_TAKT_TIME, &cd.TT, DOUBLE);
 SettingRow cd_macchine = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_MACCHINE_ARR, handleArray_Macchine, ARRAY);
 SettingRow cd_n_macchine = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_N_MACCHINE, &cd.n_macchine, UNSIGNED_CHAR);
 SettingRow cd_stazioni = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_STAZIONI_ARR, 0, ARRAY);
@@ -75,11 +81,11 @@ SettingRow cd_n_stazioni = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_N_STAZIONI, &cd.n
 SettingRow cd_oee_cell_oper = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_OEE_CELLA_OPER, handleMenu_OEE_Cell, PAGE_CHANGE);
 SettingRow cd_operatori = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_OPERATORI_ARR, 0, ARRAY);
 SettingRow cd_n_operatori = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_N_OPERATORI, &cd.n_operatori, UNSIGNED_CHAR);
-SettingRow cd_tPausa = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_PAUSA, &cd.tempo_pausa, UNSIGNED_LONG);
+SettingRow cd_tPausa = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_T_PAUSA, &cd.tempo_pausa, DOUBLE);
 SettingRow cd_ineff_oper = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_INEFF_OPER, &cd.ineffiecenza_operatore, UNSIGNED_CHAR);
 // Robot
 SettingRow cd_oee_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_OEE_ROBOT, handleMenu_OEE_Robot, PAGE_CHANGE);
-SettingRow cd_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_ROBOT_ARR, 0, ARRAY);
+SettingRow cd_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_ROBOT_ARR, handleArray_Robot, ARRAY);
 SettingRow cd_n_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_N_ROBOT, &cd.n_robot, UNSIGNED_CHAR);
 SettingRow cd_ineff_robot = CREATE_SETTINGS_ROW_IN(T_CELL_DATA_INEFF_ROBOT, &cd.ineffiecenza_robot, UNSIGNED_CHAR);
 // Risultati
@@ -90,6 +96,32 @@ SettingRow cd_prod_robot = CREATE_SETTINGS_ROW_OUT(T_CELL_DATA_PROD_ROBOT, handl
 
 SettingsPage celldata_menu = CREATE_SETTINGS_PAGE();
 /**************************** END CELL DATA ****************************/
+
+/**************************** GRIPPER ****************************/
+SettingRow grp_mass_obj = CREATE_SETTINGS_ROW_IN(T_GRIPPER_MASS_OBJ, &grp.mass_obj, DOUBLE);
+SettingRow grp_mass_grp = CREATE_SETTINGS_ROW_IN_CALC(T_GRIPPER_MASS_GRIPPER, &grp.mass_grip, DOUBLE);
+SettingRow grp_coeff_attr = CREATE_SETTINGS_ROW_IN(T_GRIPPER_COEFF_ATTR, &grp.coeff_attr, DOUBLE);
+SettingRow grp_coeff_sic = CREATE_SETTINGS_ROW_IN(T_GRIPPER_COEFF_SICUR, &grp.coeff_sic, DOUBLE);
+SettingRow grp_acceler = CREATE_SETTINGS_ROW_IN(T_GRIPPER_ACCELER, &grp.acc, DOUBLE);
+SettingRow grp_alfa = CREATE_SETTINGS_ROW_IN(T_GRIPPER_ALFA_GRADI, &grp.alpha, DOUBLE);
+SettingRow grp_force_fit = CREATE_SETTINGS_ROW_IN(T_GRIPPER_FORCE_FIT, &grp.force_fit, BOOL);
+SettingRow grp_vertical = CREATE_SETTINGS_ROW_IN(T_GRIPPER_VERTICAL, &grp.vertical, BOOL);
+SettingRow grp_n_griffe = CREATE_SETTINGS_ROW_IN(T_GRIPPER_N_GRIFFE, &grp.n_griffe, UNSIGNED_CHAR);
+SettingRow grp_presa_vert = CREATE_SETTINGS_ROW_IN(T_GRIPPER_PRESA_VERTICALE, &grp.presa_verticale, BOOL);
+SettingRow grp_force_tot = CREATE_SETTINGS_ROW_OUT_CALC(T_GRIPPER_F_TOT, &grp_res.ForceGripper, DOUBLE);
+SettingRow grp_force_grif = CREATE_SETTINGS_ROW_OUT_CALC(T_GRIPPER_F_GRIFFA, &grp_res.ForceGriffa, DOUBLE);
+
+SettingsPage gripper_menu = CREATE_SETTINGS_PAGE();
+/************************ END GRIPPER ****************************/
+
+/**************************** MENU PRINCIPALE ****************************/
+SettingRow mm_save = CREATE_SETTINGS_ROW_OUT(T_MAIN_MENU_SAVE, 0, PAGE_CHANGE);
+SettingRow mm_delete = CREATE_SETTINGS_ROW_OUT(T_MAIN_MENU_DELETE, 0, PAGE_CHANGE);
+SettingRow mm_cella = CREATE_SETTINGS_ROW_OUT(T_MAIN_MENU_CELL, handleMenu_CellData, PAGE_CHANGE);
+SettingRow mm_gripper = CREATE_SETTINGS_ROW_OUT(T_MAIN_MENU_GRIPPER, handleMenu_Gripper, PAGE_CHANGE);
+
+SettingsPage main_menu = CREATE_SETTINGS_PAGE();
+/************************ END MENU PRINCIPALE ****************************/
 
 /*****************************FUNCTION BARS DEFINITIONS*************************** */
 // Output
@@ -115,6 +147,8 @@ AppStatus* getAppStatus() {
 
 void initMenus() {
     as.cd = &cd;
+    as.grip = &grp;
+    as.grip_res = &grp_res;
     // CELL_TIMES
     addSettingRow(&celltimes_menu, &ct_oreTurno);
     addSettingRow(&celltimes_menu, &ct_turniGG);
@@ -127,12 +161,14 @@ void initMenus() {
     addSettingRow(&oee_cell_oper_menu, &oee_cp_qual);
     addSettingRow(&oee_cell_oper_menu, &oee_cp_oee);
     addSettingRow(&oee_cell_oper_menu, &oee_cp_computed);
+    addSettingRow(&oee_cell_oper_menu, &oee_cp_tt_adj);
     // OEE ROBOT
     addSettingRow(&oee_robot_menu, &oee_rbt_disp);
     addSettingRow(&oee_robot_menu, &oee_rbt_rend);
     addSettingRow(&oee_robot_menu, &oee_rbt_qual);
     addSettingRow(&oee_robot_menu, &oee_rbt_oee);
     addSettingRow(&oee_robot_menu, &oee_rbt_computed);
+    addSettingRow(&oee_robot_menu, &oee_rbt_tt_adj);
     // PROD OPER
     addSettingRow(&prod_oper_menu, &prod_oper_oraria);
     addSettingRow(&prod_oper_menu, &prod_oper_turno);
@@ -151,6 +187,7 @@ void initMenus() {
     addSettingRow(&celldata_menu, &cd_tGuasti);
     addSettingRow(&celldata_menu, &cd_ppmOper);
     addSettingRow(&celldata_menu, &cd_ppmRobot);
+    addSettingRow(&celldata_menu, &cd_takt_time);
     addSettingRow(&celldata_menu, &cd_macchine);
     addSettingRow(&celldata_menu, &cd_n_macchine);
     addSettingRow(&celldata_menu, &cd_stazioni);
@@ -168,6 +205,24 @@ void initMenus() {
     addSettingRow(&celldata_menu, &cd_rp_robot);
     addSettingRow(&celldata_menu, &cd_prod_oper);
     addSettingRow(&celldata_menu, &cd_prod_robot);
+    // GRIPPER MENU
+    addSettingRow(&gripper_menu, &grp_mass_obj);
+    addSettingRow(&gripper_menu, &grp_mass_grp);
+    addSettingRow(&gripper_menu, &grp_coeff_attr);
+    addSettingRow(&gripper_menu, &grp_coeff_sic);
+    addSettingRow(&gripper_menu, &grp_acceler);
+    addSettingRow(&gripper_menu, &grp_alfa);
+    addSettingRow(&gripper_menu, &grp_force_fit);
+    addSettingRow(&gripper_menu, &grp_vertical);
+    addSettingRow(&gripper_menu, &grp_n_griffe);
+    addSettingRow(&gripper_menu, &grp_presa_vert);
+    addSettingRow(&gripper_menu, &grp_force_tot);
+    addSettingRow(&gripper_menu, &grp_force_grif);
+    // MAIN MENU
+    addSettingRow(&main_menu, &mm_save);
+    addSettingRow(&main_menu, &mm_delete);
+    addSettingRow(&main_menu, &mm_cella);
+    addSettingRow(&main_menu, &mm_gripper);
 }
 
 /**************END CHIAMATE GLOBALI************ */
@@ -501,12 +556,15 @@ static void handleCompute_OEE_Cell(SettingRow* sr) {
         // Devo resettarlo così la funzione lo calcola nuovamente
         cd.cell_or_operatorsOEE.computed = false;
         computeOEE(&cd, OPERATOR_SOLVER);
-    }else if(sr == &oee_cp_disp){
-        computeDisp(&cd,OPERATOR_SOLVER);
-    }else if(sr == &oee_cp_rend){
-        computeRend(&cd,OPERATOR_SOLVER);
-    }else if(sr == &oee_cp_qual){
-        computeQual(&cd,OPERATOR_SOLVER);
+    } else if (sr == &oee_cp_disp) {
+        computeDisp(&cd, OPERATOR_SOLVER);
+    } else if (sr == &oee_cp_rend) {
+        computeRend(&cd, OPERATOR_SOLVER);
+    } else if (sr == &oee_cp_qual) {
+        computeQual(&cd, OPERATOR_SOLVER);
+    } else if (sr == &oee_cp_tt_adj) {
+        cd.cell_or_operatorsOEE.TT_adj = 0.0;
+        getAdjTaktTime(&cd, OPERATOR_SOLVER);
     }
 }
 
@@ -540,13 +598,16 @@ static void handleCompute_OEE_Robot(SettingRow* sr) {
     if (sr == &oee_rbt_oee) {
         // Devo resettarlo così la funzione lo calcola nuovamente
         cd.robotsOEE.computed = false;
-        computeOEE(&cd, CELL_SOLVER);
-    }else if(sr == &oee_rbt_disp){
-        computeDisp(&cd,ROBOT_SOLVER);
-    }else if(sr == &oee_rbt_rend){
-        computeRend(&cd,ROBOT_SOLVER);
-    }else if(sr == &oee_rbt_qual){
-        computeQual(&cd,ROBOT_SOLVER);
+        computeOEE(&cd, ROBOT_SOLVER);
+    } else if (sr == &oee_rbt_disp) {
+        computeDisp(&cd, ROBOT_SOLVER);
+    } else if (sr == &oee_rbt_rend) {
+        computeRend(&cd, ROBOT_SOLVER);
+    } else if (sr == &oee_rbt_qual) {
+        computeQual(&cd, ROBOT_SOLVER);
+    } else if (sr == &oee_rbt_tt_adj) {
+        cd.robotsOEE.TT_adj = 0.0;
+        getAdjTaktTime(&cd, ROBOT_SOLVER);
     }
 }
 
@@ -581,7 +642,7 @@ static void handleCompute_Prod_Oper(SettingRow* sr) {
         sr == &prod_oper_oraria ||
         sr == &prod_oper_turno ||
         sr == &prod_oper_mensile) {
-        computeProduttivita(&cd,OPERATOR_SOLVER);
+        computeProduttivita(&cd, OPERATOR_SOLVER);
     }
 }
 
@@ -616,7 +677,7 @@ static void handleCompute_Prod_Robot(SettingRow* sr) {
         sr == &prod_rbt_oraria ||
         sr == &prod_rbt_turno ||
         sr == &prod_rbt_mensile) {
-        computeProduttivita(&cd,ROBOT_SOLVER);
+        computeProduttivita(&cd, ROBOT_SOLVER);
     }
 }
 
@@ -709,7 +770,13 @@ bool handleArray_Macchine_Display(ArrayPage* ap) {
     if (*ap->length == 0) {  // Non ho elementi, l'utente ha premuto sul vuoto
         return false;
     }
+    Machine* m = &cd.macchine[ap->selected];
 
+    message_t msg = "PPM Macchina";
+    askUnsignedLong(msg, &m->ppms);
+
+    message_t msg2 = "Eff. Macchina";
+    askUnsignedChar(msg2, &m->efficienza);
     return true;
 }
 
@@ -743,9 +810,99 @@ void handleArray_Macchine(AppStatus* as) {
     }
 }
 
+// ************************** GESTIONE ARRAY MACCHINE***************************
+
+bool handleArray_Robot_Add(ArrayPage* ap) {
+    if (ap == 0 || ap->basePtr == 0) {
+        return false;
+    }
+    //*ap->length equivale a : as.cd->n_macchine
+    if (*ap->length >= 10) {  // Ho raggiunto la max dimensione dell'array Macchine
+        return false;
+    }
+    // Aumento il numero di macchine presenti
+    as.cd->n_robot++;
+    // Seleziono l'ultimo creato
+    ap->selected = *ap->length - 1;
+    return true;
+}
+
+bool handleArray_Robot_Remove(ArrayPage* ap) {
+    if (ap == 0 || ap->basePtr == 0) {
+        return false;
+    }
+    //*ap->length equivale a : as.cd->n_macchine
+    if (*ap->length == 0) {  // Ho raggiunto il minimo numero: non ho macchine da rimuovere
+        return false;
+    }
+    unsigned char to_rem = ap->selected;
+    for (unsigned int i = to_rem; i < as.cd->n_robot - 1; i++) {  // Da quella da rimuovere fino alla fine-1, copio la successiva nella precedente
+        RobotData* current = &(as.cd->robots[i]);
+        RobotData* next = &(as.cd->robots[i + 1]);
+        // Copio i valori della successiva nella preceddente
+        current->n_macchine = next->n_macchine;
+        current->serve[0] = next->serve[0];
+        current->serve[1] = next->serve[1];
+        current->serve[2] = next->serve[2];
+        current->serve[3] = next->serve[3];
+        current->serve[4] = next->serve[4];
+    }
+    if (ap->selected > 0) {
+        // Seleziono il precedente
+        ap->selected--;
+    }
+    // Diminuisco il numero di macchine presenti
+    as.cd->n_robot--;
+    return true;
+}
+
+bool handleArray_Robot_Display(ArrayPage* ap) {
+    if (ap == 0 || ap->basePtr == 0) {
+        return false;
+    }
+    if (*ap->length == 0) {  // Non ho elementi, l'utente ha premuto sul vuoto
+        return false;
+    }
+    return true;
+}
+
+void handleArray_Robot(AppStatus* as) {
+    // Imposto gli handler, chi mi chiama li ripulirà all'uscita
+    as->currentArrayMenuHandler = handleArray_Robot;
+    as->currentShowArrayElementHandler = handleArray_Robot_Display;
+    as->currentAddArrayElementHandler = handleArray_Robot_Add;
+    as->currentRemoveArrayElementHandler = handleArray_Macchine_Remove;
+
+    // Creo la struttura che gestisce l'array
+    ArrayPage ap = {};
+    ap.basePtr = &as->cd->robots[0];
+    ap.esize = sizeof(RobotData);
+    ap.length = &as->cd->n_robot;
+    ap.selected = 0;
+    ap.selectedPtr = ap.basePtr;
+    ap.elem_prefix = (unsigned char*)"- Robot ";
+    as->currentArrayMenu = &ap;
+
+    int key = 0;
+    bool ret = 0;
+    while (true) {
+        ret = handleArrayElementsMenu(&ap, &key, handleFunctionKeyArray, handleDrawFunctionBarArray,
+                                      handleArray_Robot_Display, handleArray_Robot_Remove, handleArray_Robot_Add);
+        if (!ret) {  // utente ha premuto "EXIT"
+            return;
+        }
+        // Ha premuto "EXE" sull'elemento dell'array, non lo gestisco io ma "handleArray_Robot_Display"
+        handleFunctionKey(&key);
+    }
+}
+
 // ****************************************************
 
 static void handleCompute_CellData(SettingRow* sr) {
+    if (sr == &cd_takt_time) {
+        cd.TT = 0.0;
+        getTaktTime(&cd);
+    }
 }
 
 static void setupCellDataMenu(AppStatus* as) {
@@ -796,29 +953,77 @@ void handleMenu_CellData(AppStatus* as) {
     }
 }
 
-// ******************************************************
-// ******************************************************
+// ****************************************************************************
 
-void mainHandler() {
-    /*
-    MenuStatus mstatus = {0};
-    AppStatus status = {};
-    status.toBeSaved = false;
-    // CellData cd = CREATE_CELL();
+static void handleCompute_Gripper(SettingRow* sr) {
+    if (sr == &grp_mass_grp || sr == &grp_force_grif || sr == &grp_force_tot) {
+        grp.mass_grip = 0.0;
+        computeGripper(&grp, &grp_res);
+    }
+}
 
-    int key = 0;
-    do {
-        // drawOptions(&menu_princ);
-        GetKey(&key);
-        switch (key) {
-            case KEY_CTRL_F1:
-                status.cd = &cd;
-                status.toBeSaved = true;
-                break;
+void handleMenu_Gripper(AppStatus* as) {
+    as->currentMenu = &gripper_menu;
+    as->currentMenuHandler = handleMenu_Gripper;
+    as->currentComputeHandler = handleCompute_Gripper;
 
-            default:
-                break;
+    // Non ho array da gestire, sto disegnano quello principale: rimuovo i riferimenti
+    as->currentArrayMenuHandler = 0;
+    as->currentAddArrayElementHandler = 0;
+    as->currentRemoveArrayElementHandler = 0;
+    as->currentShowArrayElementHandler = 0;
+
+    handleDrawFunctionBar();
+
+    int key;
+    bool ret = 0;
+    while (true) {
+        ret = handleSettingsPage(&gripper_menu, &key, handleFunctionKey, handleDrawFunctionBar, handleEditVariable);
+        if (!ret) {  // utente ha premuto "EXIT"
+            return;
         }
-    } while (key != KEY_CTRL_EXIT);
-     */
+        // Controllo se ha premuto "EXE" su un campo "COMPUTED" allora devo ricalcolare
+        handleFunctionKey(&key);
+    }
+}
+
+// ******************************************************
+
+static void setupMainMenu(AppStatus* as) {
+    as->currentMenu = &main_menu;
+    as->currentMenuHandler = handleMainMenu;
+    as->currentComputeHandler = 0;
+
+    // Non ho array da gestire, sto disegnano quello principale: rimuovo i riferimenti
+    as->currentArrayMenuHandler = 0;
+    as->currentAddArrayElementHandler = 0;
+    as->currentRemoveArrayElementHandler = 0;
+    as->currentShowArrayElementHandler = 0;
+}
+
+void handleMainMenu(AppStatus* as) {
+    setupMainMenu(as);
+    handleDrawFunctionBar();
+    int key;
+    bool ret = 0;
+    while (true) {
+        ret = handleSettingsPage(&main_menu, &key, 0, 0, 0);
+        if (!ret) {  // utente ha premuto "EXIT"
+            return;
+        }
+        SettingRow* sr = main_menu.rows[main_menu.selected];
+        if (sr->type == PAGE_CHANGE && sr->pointerToValue != 0) {
+            void (*menuHandler)(AppStatus* s);
+            menuHandler = sr->pointerToValue;
+            menuHandler(as);
+            // Quando esco dal menu CellTimes/OEE imposto di nuovo i valori di questo menu
+            setupMainMenu(as);
+        } else if (sr->type == PAGE_CHANGE) {
+            if (sr == &mm_save) {
+                saveToFile(as);
+            } else if (sr == &mm_delete) {
+                deleteFile(as);
+            }
+        }
+    }
 }

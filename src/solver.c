@@ -1,12 +1,12 @@
 #include "solver.h"
-
+#include <math.h>
 #include "commons.h"
 
-unsigned long int getTotalTime(CellTimes* times) {
+double getTotalTime(CellTimes* times) {
     if (times->total_th_time) {
         return times->total_th_time;
     }
-    times->total_th_time = times->gg_mese * times->turni * times->ore_turno * 3600;
+    times->total_th_time = 1.0 * times->gg_mese * times->turni * times->ore_turno;
     return times->total_th_time;
 }
 
@@ -35,11 +35,19 @@ unsigned long int getDomandaSingolaMacchina(CellData* cell) {
     return cell->domanda_pezzi;
 }
 
-float getTaktTime(CellData* cell) {
-    return (1.0f * getTotalTime(&cell->times)) / getDomandaSingolaMacchina(cell);
+double getTaktTime(CellData* cell) {
+    if (cell->TT != 0.0) {
+        return cell->TT;
+    }
+    if (cell->n_stazioni == 0) {  // non ho configurazioni delle stazioni: tutte le macchine sono in serie
+        cell->TT = (getTotalTime(&cell->times) * 3600.0) / cell->domanda_pezzi;
+    } else {
+        cell->TT = (getTotalTime(&cell->times) * 3600.0) / getDomandaSingolaMacchina(cell);
+    }
+    return cell->TT;
 }
 
-float getAdjTaktTime(CellData* cell, SOLVER_TYPE solver) {
+double getAdjTaktTime(CellData* cell, SOLVER_TYPE solver) {
     OEE* oee_data;
     switch (solver) {
         case CELL_SOLVER:
@@ -52,11 +60,15 @@ float getAdjTaktTime(CellData* cell, SOLVER_TYPE solver) {
         default:
             return -1.0f;
     }
+    if (oee_data->TT_adj != 0.0) {
+        return oee_data->TT_adj;
+    }
     computeOEE(cell, solver);
-    return getTaktTime(cell) * oee_data->OEE;
+    oee_data->TT_adj = getTaktTime(cell) * oee_data->OEE;
+    return oee_data->TT_adj;
 }
 
-unsigned long int getUnavailableTime(CellData* cell) {
+double getUnavailableTime(CellData* cell) {
     return cell->tempo_guasti + cell->tempo_manutenzione + cell->tempo_setup;
 }
 
@@ -78,11 +90,11 @@ void computeDisp(CellData* cell, SOLVER_TYPE solver) {
         default:
             return;
     }
-    unsigned long int tt = getTotalTime(&cell->times);
+    double tt = getTotalTime(&cell->times);
     // Calcolo il tempo disponibile al netto di tempi di setup, manutenzione e guasti
     cell->times.total_disp_time = tt - getUnavailableTime(cell);
     // Calcolo la disponibilitè
-    ref->disponibilita = (1.0 * cell->times.total_disp_time) / tt;
+    ref->disponibilita = (cell->times.total_disp_time) / tt;
     // Per ogni robot che ho, se sto considerando la cella con robot, moltiplico per 99%
     for (short i = 0; i < numero_robot; i++) {
         ref->disponibilita *= 0.99;
@@ -120,23 +132,29 @@ void computeRend(CellData* cell, SOLVER_TYPE solver) {
     // Per gli operatori è il 96% per i robot è il 100%
     unsigned char efficienza = 0;
     // Tempo dovuto alle pause operatori
-    unsigned long int extra_time = 0;
-    double eff_macchine = 1.0;  // Parto dal 100%
-    if (cell->efficienza == 0) {
-        // Calcolo il rendimento delle stazioni: in serie e in parallelo
-        for (unsigned char i = 0; i < cell->n_stazioni; i++) {
-            addStationEfficency(cell, i, &eff_macchine);
+    double extra_time = 0.0;
+    double eff_macchine = 1.0;        // Parto dal 100%
+    if (cell->efficienza == 0) {      // se non ho impostato un'efficienza generale calcolo quella dovuta alle singole macchine
+        if (cell->n_stazioni == 0) {  // Se non ho nulla nelle stazioni vuol dire che ho tutte le macchine in serie
+            for (unsigned char i = 0; i < cell->n_macchine; i++) {
+                eff_macchine = eff_macchine * (cell->macchine[i].efficienza / 100.0);
+            }
+        } else {
+            // Calcolo il rendimento delle stazioni: in serie e in parallelo
+            for (unsigned char i = 0; i < cell->n_stazioni; i++) {
+                addStationEfficency(cell, i, &eff_macchine);
+            }
         }
     } else {
         // Se la cella ha un efficienza complessiva uso direttamente quella
-        eff_macchine = cell->efficienza;
+        eff_macchine = cell->efficienza / 100.0;
     }
 
     OEE* ref;
     switch (solver) {
         case OPERATOR_SOLVER:
             efficienza = 100 - cell->ineffiecenza_operatore;
-            extra_time = cell->tempo_pausa;
+            extra_time = cell->tempo_pausa * cell->times.turni * cell->times.gg_mese;
         case CELL_SOLVER:
             ref = &cell->cell_or_operatorsOEE;
             break;
@@ -147,14 +165,14 @@ void computeRend(CellData* cell, SOLVER_TYPE solver) {
         default:
             return;
     }
-    unsigned long int tt = getTotalTime(&cell->times);
+    double tt = getTotalTime(&cell->times);
     // Calcolo il tempo disponibile se non l'ho ancora calcolato
     if (!cell->times.total_disp_time) {
         // Calcolo il tempo disponibile al netto di tempi di setup, manutenzione e guasti
         cell->times.total_disp_time = tt - getUnavailableTime(cell);
     }
     // Calcolo il rendimento
-    ref->rendimento = ((1.0 * (cell->times.total_disp_time - extra_time)) / cell->times.total_disp_time) * efficienza/100.0 * eff_macchine;
+    ref->rendimento = ((cell->times.total_disp_time - extra_time) / cell->times.total_disp_time) * (efficienza / 100.0) * eff_macchine;
     // è da ri-calcolare l'OEE complessivo poichè ho modificato il rendimento
     ref->computed = false;
 }
@@ -165,14 +183,14 @@ void computeQual(CellData* cell, SOLVER_TYPE solver) {
     switch (solver) {
         case CELL_SOLVER:
         case OPERATOR_SOLVER:
-            if (cell->ppm_cella_robot > 0) {
-                quality = 1.0 - cell->ppm_cella_oper / 1e6;
+            if (cell->ppm_cella_oper > 0) {
+                quality = 1.0 - (cell->ppm_cella_oper / 1e6);
             }
             ref = &cell->cell_or_operatorsOEE;
             break;
         case ROBOT_SOLVER:
             if (cell->ppm_cella_robot > 0) {
-                quality = 1.0 - cell->ppm_cella_robot / 1e6;
+                quality = 1.0 - (cell->ppm_cella_robot / 1e6);
             }
             ref = &cell->robotsOEE;
             break;
@@ -244,4 +262,38 @@ void computeProduttivita(CellData* cell, SOLVER_TYPE solver) {
     pr->turno = (unsigned long int)(pr->oraria * cell->times.ore_turno);
     pr->giornaliera = pr->turno * cell->times.turni;
     pr->mensile = pr->giornaliera * cell->times.gg_mese;
+}
+
+void computeGripper(Gripping* gp, GrippingResult* gr) {
+    if (gp == 0 || gr == 0) {
+        return ;
+    }
+    //Calcolo la massa del gripper
+    if (gp->mass_grip == 0.0) {
+        gp->mass_grip = gp->mass_obj * 0.3;
+        if (gp->mass_grip < 1.5) {
+            gp->mass_grip = 1.5;
+        }
+    }
+    //Calcolo le forze di gripping
+    double accMax = gp->acc;
+    if (gp->vertical) {
+        accMax += GRAVITY;
+    }
+    if (gp->force_fit) {
+        gr->ForceGripper = gp->mass_obj * accMax * gp->coeff_sic / (gp->coeff_attr);
+    } else {
+        gr->ForceGripper = gp->mass_obj * accMax * gp->coeff_sic;
+    }
+    if(gp->alpha != 0.0){
+        double mezzo_alpha_rad = (gp->alpha * PI/180.0)/2;
+        if(gp->force_fit){
+            gr->ForceGripper = gr->ForceGripper * sin(mezzo_alpha_rad);
+        }else if(gp->presa_verticale){
+            gr->ForceGripper = gr->ForceGripper * tan(mezzo_alpha_rad);
+        }
+    }
+    if (gp->n_griffe > 0) {
+        gr->ForceGriffa = gr->ForceGripper / gp->n_griffe;
+    }
 }
