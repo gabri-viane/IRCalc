@@ -1,5 +1,4 @@
 #include "solver.h"
-#include <math.h>
 #include "commons.h"
 
 double getTotalTime(CellTimes* times) {

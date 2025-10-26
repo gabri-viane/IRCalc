@@ -2,7 +2,6 @@
 #include <fxcg/file.h>
 #include <fxcg/keyboard.h>
 #include <fxcg/misc.h>
-#include <math.h>
 
 #include "commons.h"
 #include "datatypes.h"
@@ -11,7 +10,7 @@
 #include "programflow.h"
 #include "session.h"
 #include "solver.h"
-#include <math.h>
+#include "math.h"
 
 int main(void) {
     initMenus();
@@ -25,6 +24,7 @@ int main(void) {
     while (1) {
         handleMainMenu(as);
         GetKey(&key);
+        sin(key / 10.0);
         if (key == KEY_CTRL_DEL) {
             deleteFile(as);
         } else if (key == KEY_CTRL_EXE) {
